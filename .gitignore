@@ -209,5 +209,6 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,macos
 
 secrets/
-credentials.json
-token.json
+secrets/credentials.json
+secrets/token.json
+service-account.json
