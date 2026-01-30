@@ -14,6 +14,11 @@ class RedisSettings(BaseSettings):
     db: int = 0
 
 
+class GoogleSheetsSettings(BaseSettings):
+    spreadsheet_id: str
+    range_name: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_nested_delimiter="__", env_file_encoding="utf-8"
@@ -22,10 +27,8 @@ class Settings(BaseSettings):
     tg_token: str
     allow_origins: List[str] = ["*"]
 
-    class Config:
-        env_file = ".env"
-
     redis: RedisSettings
+    google_sheets: GoogleSheetsSettings
 
 
 settings = Settings()  # type: ignore

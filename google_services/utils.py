@@ -3,22 +3,22 @@ Utils for Google services.
 """
 
 import datetime
+import logging
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from google_services.cred import get_token
 
+logger = logging.getLogger(__name__)
+
 SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
-SPREADSHEET_ID = "1q8s35_JqYKJQFtxRCE_Elo1vl8BNGJ9qQk4GMQAdAvU"
-RANGE_NAME = "2025!A5:D"
 
-
-def get_calendar_events():
+def get_calendar_events(calendar_id: str = "primary"):
     """
     Get events from calendar
     """
@@ -33,7 +33,7 @@ def get_calendar_events():
         events_result = (
             service.events()
             .list(
-                calendarId="primary",
+                calendarId=calendar_id,
                 timeMin=now,
                 maxResults=10,
                 singleEvents=True,
@@ -46,7 +46,9 @@ def get_calendar_events():
         return events
 
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logger.error(f"An error occurred: {error}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def get_values_sheet(spreadsheet_id, range_name):
@@ -54,7 +56,6 @@ def get_values_sheet(spreadsheet_id, range_name):
     Get values from Google Sheet
     """
     creds = get_token(SCOPES)
-    # pylint: disable=maybe-no-member
     try:
         service = build("sheets", "v4", credentials=creds)
 
@@ -66,11 +67,21 @@ def get_values_sheet(spreadsheet_id, range_name):
         )
         return result
     except HttpError as error:
-        print(f"An error occurred: {error}")
-        return error
+        logger.error(f"An http error occurred: {error}")
+        raise error
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        raise e
 
 
-def append_value_sheet(date: str, amount: str, category: str, note: str):
+def append_value_sheet(
+    date: str,
+    amount: str,
+    category: str,
+    note: str,
+    spreadsheet_id: str,
+    range_name: str,
+):
     """
     Append value to Google Sheet
     """
@@ -83,8 +94,8 @@ def append_value_sheet(date: str, amount: str, category: str, note: str):
             service.spreadsheets()
             .values()
             .append(
-                spreadsheetId=SPREADSHEET_ID,
-                range=RANGE_NAME,
+                spreadsheetId=spreadsheet_id,
+                range=range_name,
                 valueInputOption="USER_ENTERED",
                 body={"values": [[date, amount, note, category]]},
             )
@@ -92,5 +103,8 @@ def append_value_sheet(date: str, amount: str, category: str, note: str):
         )
         return result
     except HttpError as error:
-        print(f"An error occurred: {error}")
-        return error
+        logger.error(f"An error occurred: {error}")
+        raise error
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        raise e

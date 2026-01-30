@@ -4,39 +4,26 @@ Module for managing Google API tokens.
 
 import os.path
 
-from google.auth.exceptions import RefreshError
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.exceptions import OAuthError
+from google.oauth2 import service_account
 
 
 def get_token(scopes):
     """
     Get API token
     """
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", scopes)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-            except RefreshError:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    "credentials.json", scopes
-                )
-                creds = flow.run_local_server(port=0)
-                # Save the credentials for the next run
-                with open("token.json", "w") as token:
-                    token.write(creds.to_json())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", scopes)
-            creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open("token.json", "w") as token:
-                token.write(creds.to_json())
+    if not os.path.exists("service-account.json"):
+        raise OAuthError()
+    creds = service_account.Credentials.from_service_account_file(
+        "service-account.json", scopes=scopes
+    )
     return creds
+
+
+if __name__ == "__main__":
+    SCOPES = [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/spreadsheets",
+    ]
+    data = get_token(scopes=SCOPES)
+    print(data)
