@@ -6,12 +6,12 @@ import datetime
 import json
 import logging
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from api.schemas import DataToSheet, InvoiceToSheet, ParseInvoiceUrl, SendMessageRequest
 from api.tasks import invoice_to_telegram_bot
 from api.telegram_utils import send_telegram_message
-from core.config import redis
+from core.config import redis, settings
 from google_services.utils import append_value_sheet
 
 logger = logging.getLogger(__name__)
@@ -57,6 +57,8 @@ async def save_to_sheet_rt(data: DataToSheet):
             amount=data.amount,
             category=data.category,
             note=data.type,
+            spreadsheet_id=settings.google_sheets.spreadsheet_id,
+            range_name=settings.google_sheets.range_name,
         )
         logger.info(f"Data to be saved to sheet: {data}")
         return result
@@ -119,6 +121,8 @@ async def invoice_to_sheet_rt(data: InvoiceToSheet):
                 amount=i["amount"] * 0.01,
                 category=i["category"],
                 note="трата",
+                spreadsheet_id=settings.google_sheets.spreadsheet_id,
+                range_name=settings.google_sheets.range_name,
             )
             logger.info(f"Data to be saved to sheet: {data}")
             result.append(response)
