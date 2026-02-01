@@ -18,12 +18,3 @@ def get_token(scopes):
         "service-account.json", scopes=scopes
     )
     return creds
-
-
-if __name__ == "__main__":
-    SCOPES = [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/spreadsheets",
-    ]
-    data = get_token(scopes=SCOPES)
-    print(data)

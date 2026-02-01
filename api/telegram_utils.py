@@ -3,11 +3,13 @@ Module for Telegram utility functions.
 """
 
 import logging
+
 from bot.main import bot
 
 logger = logging.getLogger(__name__)
 
-async def send_telegram_message(chat_id: int, text: str, reply_markup = None):
+
+async def send_telegram_message(chat_id: int, text: str, reply_markup=None):
     """
     Send a message via Telegram bot
     """
